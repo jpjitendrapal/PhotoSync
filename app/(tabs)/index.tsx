@@ -1,61 +1,96 @@
-import { Image, StyleSheet, Platform } from "react-native";
-
-import { HelloWave } from "@/components/HelloWave";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { useState, useEffect } from "react";
+import { StyleSheet } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import TodoList from "@/components/ToDos/TodoList";
+import TodoInput from "@/components/ToDos/TodoInput";
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
-        />
+const TODOS_STORAGE_KEY = "phoneSync-todos";
+
+export default function Todos() {
+  const [todos, setTodos] = useState<{ text: string; completed: boolean }[]>(
+    []
+  );
+
+  useEffect(() => {
+    const loadTodos = async () => {
+      try {
+        const storedTodos = await AsyncStorage.getItem(TODOS_STORAGE_KEY);
+        if (storedTodos) {
+          setTodos(JSON.parse(storedTodos));
+        }
+      } catch (error) {
+        console.error("Failed to load todos from storage", error);
       }
-    >
+    };
+
+    loadTodos();
+  }, []);
+
+  useEffect(() => {
+    const saveTodos = async () => {
+      try {
+        await AsyncStorage.setItem(TODOS_STORAGE_KEY, JSON.stringify(todos));
+      } catch (error) {
+        console.error("Failed to save todos to storage", error);
+      }
+    };
+
+    saveTodos();
+  }, [todos]);
+
+  const addTodo = (text: string) => {
+    setTodos([...todos, { text, completed: false }]);
+  };
+
+  const toggleTodo = (index: number) => {
+    const newTodos = [...todos];
+    newTodos[index].completed = !newTodos[index].completed;
+    setTodos(newTodos);
+  };
+
+  const deleteTodo = (index: number) => {
+    const newTodos = todos.filter((_, i) => i !== index);
+    setTodos(newTodos);
+  };
+
+  const clearTodos = async () => {
+    try {
+      await AsyncStorage.clear();
+      setTodos([]);
+    } catch (error) {
+      console.error("Failed to clear todos from storage", error);
+    }
+  };
+
+  return (
+    <ThemedView style={styles.container}>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText>
-          This is POC app for the learning of React Native with Expo Framework.
+        <ThemedText type="title" style={{ paddingBottom: 16 }}>
+          Your Task List
         </ThemedText>
+        <IconSymbol size={28} name="paperplane.fill" color="black" />
       </ThemedView>
-      <ThemedView style={styles.footerContainer}>
-        <ThemedText type="footer">- by JP</ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <TodoInput addTodo={addTodo} clearTodos={clearTodos} />
+      <TodoList todos={todos} toggleTodo={toggleTodo} deleteTodo={deleteTodo} />
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "space-between",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 50,
+    paddingLeft: 16,
+    paddingRight: 16,
+    paddingBottom: 50,
   },
   titleContainer: {
     flexDirection: "row",
-    alignItems: "center",
     gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  footerContainer: {
-    alignItems: "flex-end",
-    marginBottom: 16,
-    marginRight: 16,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
   },
 });
