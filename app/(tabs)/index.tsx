@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingTop: 50,
+    paddingTop: Platform.OS === "web" ? 10 : 40,
     paddingLeft: 16,
     paddingRight: 16,
     paddingBottom: 50,

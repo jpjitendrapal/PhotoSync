@@ -25,7 +25,8 @@ export default function TabLayout() {
             // },
             web: {
               position: "relative",
-              width: 800,
+              maxWidth: 800,
+              width: "100vw",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
