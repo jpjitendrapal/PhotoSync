@@ -6,13 +6,12 @@ import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TodoList from "@/components/ToDos/TodoList";
 import TodoInput from "@/components/ToDos/TodoInput";
+import { TToDoItem } from "@/components/ToDos/types";
 
 const TODOS_STORAGE_KEY = "phoneSync-todos";
 
 export default function Todos() {
-  const [todos, setTodos] = useState<{ text: string; completed: boolean }[]>(
-    []
-  );
+  const [todos, setTodos] = useState<TToDoItem[]>([]);
 
   useEffect(() => {
     const loadTodos = async () => {
@@ -42,12 +41,13 @@ export default function Todos() {
   }, [todos]);
 
   const addTodo = (text: string) => {
-    setTodos([...todos, { text, completed: false }]);
+    setTodos([...todos, { text, completed: false, date: new Date() }]);
   };
 
   const toggleTodo = (index: number) => {
     const newTodos = [...todos];
     newTodos[index].completed = !newTodos[index].completed;
+    newTodos[index].completedDate = new Date();
     setTodos(newTodos);
   };
 

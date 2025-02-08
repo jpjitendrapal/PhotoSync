@@ -1,8 +1,9 @@
 import { FlatList, StyleSheet } from "react-native";
 import TodoItem from "./TodoItem";
+import { TToDoItem } from "./types";
 
 type TTodoListProps = {
-  todos: { text: string; completed: boolean }[];
+  todos: TToDoItem[];
   toggleTodo: (index: number) => void;
   deleteTodo: (index: number) => void;
 };
