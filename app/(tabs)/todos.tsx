@@ -32,7 +32,6 @@ export default function Todos() {
   useEffect(() => {
     const saveTodos = async () => {
       try {
-        // Save todos to storage
         await AsyncStorage.setItem(TODOS_STORAGE_KEY, JSON.stringify(todos));
       } catch (error) {
         console.error("Failed to save todos to storage", error);
@@ -52,6 +51,20 @@ export default function Todos() {
     setTodos(newTodos);
   };
 
+  const deleteTodo = (index: number) => {
+    const newTodos = todos.filter((_, i) => i !== index);
+    setTodos(newTodos);
+  };
+
+  const clearTodos = async () => {
+    try {
+      await AsyncStorage.clear();
+      setTodos([]);
+    } catch (error) {
+      console.error("Failed to clear todos from storage", error);
+    }
+  };
+
   return (
     <ThemedView style={styles.container}>
       <ThemedView style={styles.titleContainer}>
@@ -60,8 +73,8 @@ export default function Todos() {
         </ThemedText>
         <IconSymbol size={28} name="paperplane.fill" color="black" />
       </ThemedView>
-      <TodoInput addTodo={addTodo} />
-      <TodoList todos={todos} toggleTodo={toggleTodo} />
+      <TodoInput addTodo={addTodo} clearTodos={clearTodos} />
+      <TodoList todos={todos} toggleTodo={toggleTodo} deleteTodo={deleteTodo} />
     </ThemedView>
   );
 }
