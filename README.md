@@ -2,6 +2,18 @@
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
+This project is created using following commands
+`npx create-expo-app@latest`
+
+To create a build follow these:
+https://docs.expo.dev/build/setup/
+
+to generate .aab build use following command:
+`eas build -p android`
+
+to generate apk build use following command:
+`eas build -p android --profile preview`
+
 ## Get started
 
 1. Install dependencies
