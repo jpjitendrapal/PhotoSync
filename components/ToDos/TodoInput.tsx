@@ -37,6 +37,7 @@ export default function TodoInput({ addTodo, clearTodos }: TTodoInputProps) {
         value={text}
         onChangeText={setText}
         placeholder="Add a new task"
+        onSubmitEditing={handleAddTodo}
       />
       <TouchableOpacity style={styles.button} onPress={handleAddTodo}>
         <Text style={styles.buttonText}>Add</Text>
