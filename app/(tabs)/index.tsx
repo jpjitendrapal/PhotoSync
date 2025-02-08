@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -41,7 +41,7 @@ export default function Todos() {
   }, [todos]);
 
   const addTodo = (text: string) => {
-    setTodos([...todos, { text, completed: false, date: new Date() }]);
+    setTodos([{ text, completed: false, date: new Date() }, ...todos]);
   };
 
   const toggleTodo = (index: number) => {
@@ -66,20 +66,32 @@ export default function Todos() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title" style={{ paddingBottom: 16 }}>
-          Your Task List
-        </ThemedText>
-        <IconSymbol size={28} name="paperplane.fill" color="black" />
+    <View style={styles.wrapper}>
+      <ThemedView style={styles.container}>
+        <ThemedView style={styles.titleContainer}>
+          <ThemedText type="title" style={{ paddingBottom: 16 }}>
+            Your Task List
+          </ThemedText>
+          <IconSymbol size={28} name="paperplane.fill" color="black" />
+        </ThemedView>
+        <TodoInput addTodo={addTodo} clearTodos={clearTodos} />
+        <TodoList
+          todos={todos}
+          toggleTodo={toggleTodo}
+          deleteTodo={deleteTodo}
+        />
       </ThemedView>
-      <TodoInput addTodo={addTodo} clearTodos={clearTodos} />
-      <TodoList todos={todos} toggleTodo={toggleTodo} deleteTodo={deleteTodo} />
-    </ThemedView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+  },
   container: {
     flex: 1,
     justifyContent: "center",
@@ -88,6 +100,7 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
     paddingRight: 16,
     paddingBottom: 50,
+    width: "100%",
   },
   titleContainer: {
     flexDirection: "row",
