@@ -60,7 +60,7 @@ export default function TodoItem({
         </View>
       </Text>
 
-      <Text>{todo.completed && "✅"}</Text>
+      <Text onPress={() => toggleTodo(index)}>{todo.completed && "✅"}</Text>
       <TouchableOpacity
         onPress={() => deleteTodo(index)}
         style={styles.deleteButton}
