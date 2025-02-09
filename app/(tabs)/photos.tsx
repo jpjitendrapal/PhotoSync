@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Modal,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import * as MediaLibrary from "expo-media-library";
 import ImageViewer from "react-native-image-zoom-viewer";
@@ -20,6 +21,9 @@ export default function Photos() {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(
     null
   );
+
+  const deviceWidth = Dimensions.get("window").width;
+  const photoWidth = (deviceWidth - 60) / 4; // Adjust the margin and padding as needed
 
   useEffect(() => {
     (async () => {
@@ -98,33 +102,39 @@ export default function Photos() {
 
   const groupedPhotos = groupPhotosByMonth(photos);
 
+  const renderPhotoRow = ({ section, index }: any) => {
+    const items = section.data.slice(index * 4, index * 4 + 4);
+    const sectionIndex = groupedPhotos.findIndex(
+      (s) => s.title === section.title
+    );
+    return (
+      <View style={styles.photoRow}>
+        {items.map((photo: object, i: number) => (
+          <TouchableOpacity
+            key={i}
+            onPress={() => handlePhotoPress(sectionIndex, index * 4 + i)}
+          >
+            <Image
+              source={{ uri: photo.uri }}
+              style={[styles.photo, { width: photoWidth }]}
+            />
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Photos</Text>
       <SectionList
         sections={groupedPhotos}
         keyExtractor={(item) => item.id}
-        renderItem={({ item, index, section }) => {
-          const sectionIndex = groupedPhotos.findIndex(
-            (s) => s.title === section.title
-          );
-          const items = section.data.slice(index * 4, index * 4 + 4);
-          return (
-            items?.length > 0 && (
-              <View style={styles.photoRow}>
-                {items.map((photo, i) => (
-                  <TouchableOpacity
-                    key={i}
-                    onPress={() =>
-                      handlePhotoPress(sectionIndex, index * 4 + i)
-                    }
-                  >
-                    <Image source={{ uri: photo.uri }} style={styles.photo} />
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )
-          );
+        renderItem={({ section, index }) => {
+          if (index % 4 === 0) {
+            return renderPhotoRow({ section, index: Math.floor(index / 4) });
+          }
+          return null;
         }}
         renderSectionHeader={({ section: { title } }) => (
           <Text style={styles.sectionHeader}>{title}</Text>
@@ -144,12 +154,12 @@ export default function Photos() {
         onRequestClose={handleCloseModal}
       >
         <View style={styles.modalOverlay}>
-          {/* <TouchableOpacity
+          <TouchableOpacity
             onPress={handleCloseModal}
             style={styles.closeButton}
           >
             <Text style={styles.closeButtonText}>Close</Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
           {selectedPhotoIndex !== null && (
             <ImageViewer
               imageUrls={photos.map((photo) => ({ url: photo.uri }))}
@@ -186,11 +196,10 @@ const styles = StyleSheet.create({
   },
   photoRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    // justifyContent: "space-between",
     marginBottom: 10,
   },
   photo: {
-    width: 80,
     height: 80,
     margin: 5,
   },
