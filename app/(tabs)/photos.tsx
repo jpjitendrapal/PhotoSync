@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  FlatList,
+  SectionList,
   Image,
   TouchableOpacity,
   Modal,
+  ActivityIndicator,
 } from "react-native";
 import * as MediaLibrary from "expo-media-library";
 import ImageViewer from "react-native-image-zoom-viewer";
@@ -19,8 +20,6 @@ export default function Photos() {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(
     null
   );
-  const prevMonth = useRef<string | null>(null);
-  const addMonth = useRef(false);
 
   useEffect(() => {
     (async () => {
@@ -53,7 +52,35 @@ export default function Photos() {
     setLoading(false);
   };
 
-  const handlePhotoPress = (index: number) => {
+  const groupPhotosByMonth = (photos: MediaLibrary.Asset[]) => {
+    const groupedPhotos: { title: string; data: MediaLibrary.Asset[] }[] = [];
+    const photosByMonth: { [key: string]: MediaLibrary.Asset[] } = {};
+
+    photos.forEach((photo) => {
+      const date = new Date(photo.creationTime);
+      const month = date.toLocaleString("default", {
+        month: "long",
+        year: "numeric",
+      });
+
+      if (!photosByMonth[month]) {
+        photosByMonth[month] = [];
+      }
+      photosByMonth[month].push(photo);
+    });
+
+    for (const month in photosByMonth) {
+      groupedPhotos.push({ title: month, data: photosByMonth[month] });
+    }
+
+    return groupedPhotos;
+  };
+
+  const handlePhotoPress = (sectionIndex: number, photoIndex: number) => {
+    const index =
+      groupedPhotos
+        .slice(0, sectionIndex)
+        .reduce((acc, section) => acc + section.data.length, 0) + photoIndex;
     setSelectedPhotoIndex(index);
   };
 
@@ -69,34 +96,42 @@ export default function Photos() {
     return <Text>No access to media library</Text>;
   }
 
+  const groupedPhotos = groupPhotosByMonth(photos);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Photos Test</Text>
-      <FlatList
-        data={photos}
+      <Text style={styles.title}>Photos</Text>
+      <SectionList
+        sections={groupedPhotos}
         keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => {
-          addMonth.current = false;
-          const monthName = new Date(item.creationTime).toLocaleString(
-            "en-US",
-            { month: "short" }
+        renderItem={({ item, index, section }) => {
+          const sectionIndex = groupedPhotos.findIndex(
+            (s) => s.title === section.title
           );
-          if (prevMonth.current != monthName) {
-            prevMonth.current = monthName;
-            addMonth.current = true;
-          }
+          const items = section.data.slice(index * 4, index * 4 + 4);
           return (
-            <TouchableOpacity onPress={() => handlePhotoPress(index)}>
-              <View>
-                {addMonth.current && (
-                  <Text style={{ fontSize: 40 }}>{prevMonth.current}</Text>
-                )}
-                <Image source={{ uri: item.uri }} style={styles.photo} />
+            items?.length > 0 && (
+              <View style={styles.photoRow}>
+                {items.map((photo, i) => (
+                  <TouchableOpacity
+                    key={i}
+                    onPress={() =>
+                      handlePhotoPress(sectionIndex, index * 4 + i)
+                    }
+                  >
+                    <Image source={{ uri: photo.uri }} style={styles.photo} />
+                  </TouchableOpacity>
+                ))}
               </View>
-            </TouchableOpacity>
+            )
           );
         }}
-        numColumns={3} // Adjust the number of columns as needed
+        renderSectionHeader={({ section: { title } }) => (
+          <Text style={styles.sectionHeader}>{title}</Text>
+        )}
+        ListFooterComponent={
+          loading ? <ActivityIndicator size="large" color="#0000ff" /> : null
+        }
         showsVerticalScrollIndicator={false} // Hide vertical scrollbar
         showsHorizontalScrollIndicator={false} // Hide horizontal scrollbar
         onEndReached={loadPhotos} // Load more photos when reaching the end
@@ -109,12 +144,12 @@ export default function Photos() {
         onRequestClose={handleCloseModal}
       >
         <View style={styles.modalOverlay}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={handleCloseModal}
             style={styles.closeButton}
           >
             <Text style={styles.closeButtonText}>Close</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           {selectedPhotoIndex !== null && (
             <ImageViewer
               imageUrls={photos.map((photo) => ({ url: photo.uri }))}
@@ -142,9 +177,21 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 16,
   },
+  sectionHeader: {
+    fontSize: 20,
+    fontWeight: "bold",
+    backgroundColor: "#f4f4f4",
+    padding: 8,
+    width: "100%",
+  },
+  photoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
   photo: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
     margin: 5,
   },
   modalOverlay: {
