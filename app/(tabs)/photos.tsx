@@ -42,7 +42,7 @@ export default function Photos() {
 
     const media = await MediaLibrary.getAssetsAsync({
       mediaType: MediaLibrary.MediaType.photo,
-      first: 50, // Adjust the number of photos to fetch per page
+      first: 100, // Adjust the number of photos to fetch per page
       after: endCursor,
       sortBy: [MediaLibrary.SortBy.creationTime], // Sort by creation time
     });
@@ -140,12 +140,14 @@ export default function Photos() {
           <Text style={styles.sectionHeader}>{title}</Text>
         )}
         ListFooterComponent={
-          loading ? <ActivityIndicator size="large" color="#0000ff" /> : null
+          <View style={styles.footer}>
+            {loading && <ActivityIndicator size="large" color="#0000ff" />}
+          </View>
         }
         showsVerticalScrollIndicator={false} // Hide vertical scrollbar
         showsHorizontalScrollIndicator={false} // Hide horizontal scrollbar
         onEndReached={loadPhotos} // Load more photos when reaching the end
-        onEndReachedThreshold={0.5} // Adjust the threshold as needed
+        onEndReachedThreshold={0.5} // Adjust the threshold to load earlier
       />
 
       <Modal
@@ -183,9 +185,9 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 16,
+    marginTop: 16,
   },
   sectionHeader: {
     fontSize: 20,
@@ -196,12 +198,14 @@ const styles = StyleSheet.create({
   },
   photoRow: {
     flexDirection: "row",
-    // justifyContent: "space-between",
     marginBottom: 10,
   },
   photo: {
     height: 80,
     margin: 5,
+  },
+  footer: {
+    paddingVertical: 20,
   },
   modalOverlay: {
     flex: 1,

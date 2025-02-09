@@ -1,6 +1,7 @@
 import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { TToDoItem } from "./types";
+import { getFormatDate } from "./../utils/utils";
 
 type TTodoItemProps = {
   todo: TToDoItem;
@@ -31,30 +32,14 @@ export default function TodoItem({
             {todo.text}
           </Text>
           {todo.completed && todo.completedDate ? (
-            <Text
-              style={{ fontSize: 10 }}
-            >{`Completed: ${todo.completedDate?.toLocaleString("en-GB", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-              hour12: true, // Use 12-hour format
-            })}`}</Text>
+            <Text style={{ fontSize: 10 }}>{`Completed: ${getFormatDate(
+              todo.completedDate
+            )}`}</Text>
           ) : (
             todo.date && (
-              <Text
-                style={{ fontSize: 10 }}
-              >{`Created: ${todo?.date?.toLocaleString("en-GB", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: true, // Use 12-hour format
-              })}`}</Text>
+              <Text style={{ fontSize: 10 }}>{`Created: ${getFormatDate(
+                todo?.date
+              )}`}</Text>
             )
           )}
         </View>
